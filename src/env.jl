@@ -111,12 +111,12 @@ unset!(env::Environment, flag::EnvironmentFlags) = unset!(env, Cuint(flag))
 
 **Note:** Consult LMDB documentation for particual values of environment parameters and flags.
 """
-function setindex!(env::Environment, val::Cuint, option::Symbol)
+function setindex!(env::Environment, val::Culong, option::Symbol)
     ret = zero(Cint)
     if option == :Readers
         ret = ccall( (:mdb_env_set_maxreaders, liblmdb), Cint, (Ptr{Nothing}, Cuint), env.handle, val)
     elseif option == :MapSize
-        ret = ccall( (:mdb_env_set_mapsize, liblmdb), Cint, (Ptr{Nothing}, Cuint), env.handle, val)
+        ret = ccall( (:mdb_env_set_mapsize, liblmdb), Culong, (Ptr{Nothing}, Culong), env.handle, val)
     elseif option == :DBs
         ret = ccall( (:mdb_env_set_maxdbs, liblmdb), Cint, (Ptr{Nothing}, Cuint), env.handle, val)
     else
