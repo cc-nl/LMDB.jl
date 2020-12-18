@@ -111,12 +111,12 @@ unset!(env::Environment, flag::EnvironmentFlags) = unset!(env, Cuint(flag))
 
 **Note:** Consult LMDB documentation for particual values of environment parameters and flags.
 """
-function setindex!(env::Environment, val::Culong, option::Symbol)
+function setindex!(env::Environment, val::Cuint, option::Symbol)
     ret = zero(Cint)
     if option == :Readers
         ret = ccall( (:mdb_env_set_maxreaders, liblmdb), Cint, (Ptr{Nothing}, Cuint), env.handle, val)
     elseif option == :MapSize
-        ret = ccall( (:mdb_env_set_mapsize, liblmdb), Culong, (Ptr{Nothing}, Culong), env.handle, val)
+        ret = ccall( (:mdb_env_set_mapsize, liblmdb), Cint, (Ptr{Nothing}, Cuint), env.handle, val)
     elseif option == :DBs
         ret = ccall( (:mdb_env_set_maxdbs, liblmdb), Cint, (Ptr{Nothing}, Cuint), env.handle, val)
     else
@@ -125,7 +125,22 @@ function setindex!(env::Environment, val::Culong, option::Symbol)
     (ret != 0) && throw(LMDBError(ret))
     return ret
 end
-setindex!(env::Environment, val::Int, option::Symbol) = setindex!(env, Cuint(val), option)
+function setindex!(env::Environment, val::Culong, option::Symbol)
+    ret = zero(Cint)
+    if option == :Readers
+        ret = ccall( (:mdb_env_set_maxreaders, liblmdb), Clong, (Ptr{Nothing}, Culong), env.handle, val)
+    elseif option == :MapSize
+        ret = ccall( (:mdb_env_set_mapsize, liblmdb), Clong, (Ptr{Nothing}, Culong), env.handle, val)
+    elseif option == :DBs
+        ret = ccall( (:mdb_env_set_maxdbs, liblmdb), Clong, (Ptr{Nothing}, Culong), env.handle, val)
+    else
+        warn("Cannot set $(string(option)) value")
+    end
+    (ret != 0) && throw(LMDBError(ret))
+    return ret
+end
+setindex!(env::Environment, val::Int32, option::Symbol) = setindex!(env, Cuint(val), option)
+setindex!(env::Environment, val::Int64, option::Symbol) = setindex!(env, Culong(val), option)
 
 """Get environment flags and parameters
 
